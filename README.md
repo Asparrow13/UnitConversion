@@ -160,14 +160,6 @@ The backend sends:
 - The available tools with descriptions
 - The user request in natural language
 
-### Prompting Theory Notes
-
-Document in the final report:
-
-- Structured output prompting
-- Tool selection through constrained instructions
-- Low-ambiguity prompting by enumerating the available tools
-- Any additional prompting improvements you test
 
 ## Evaluation Documentation
 
@@ -180,21 +172,3 @@ promptfoo eval -c promptfoo/basic-conversions.yaml
 promptfoo eval -c promptfoo/extended-evaluation.yaml
 ```
 
-For the report, document:
-
-- Which test cases were used
-- Which models performed best
-- Which prompts or tools caused errors
-- What conclusions you used when selecting the final model
-
-## Report Checklist
-
-Use this `README.md` as the drafting space for the written documentation.
-
-- [ ] Add screenshot of the React UI
-- [ ] Add final model choice and justification
-- [ ] Add final prompts used
-- [ ] Add API documentation details
-- [ ] Add agent and tool explanation
-- [ ] Add evaluation screenshots and conclusions
-- [ ] Edit into a 3-4 page final report
