@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Unit Conversion Mini-Project Report</title>
+    <style>
+      body {
+        font-family: "Liberation Serif", serif;
+        margin: 2.2cm;
+        line-height: 1.45;
+        color: #111;
+      }
+
+      h1,
+      h2,
+      h3 {
+        color: #14213d;
+      }
+
+      h1 {
+        font-size: 24pt;
+        margin-bottom: 0.2cm;
+      }
+
+      h2 {
+        font-size: 16pt;
+        margin-top: 0.7cm;
+        margin-bottom: 0.25cm;
+      }
+
+      h3 {
+        font-size: 13pt;
+        margin-top: 0.45cm;
+        margin-bottom: 0.2cm;
+      }
+
+      p,
+      li {
+        font-size: 11.5pt;
+      }
+
+      img {
+        width: 100%;
+        max-width: 15cm;
+        display: block;
+        margin: 0.3cm auto;
+        border: 1px solid #bbb;
+      }
+
+      .meta {
+        color: #444;
+        margin-bottom: 0.6cm;
+      }
+
+      .caption {
+        text-align: center;
+        font-size: 10pt;
+        color: #444;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Unit Conversion Mini-Project Report</h1>
+    <p class="meta">
+      Artificial Intelligence Applications, 4th Semester Computer Science
+    </p>
+
+    <h2>1. Introduction</h2>
+    <p>
+      This mini-project implements a unit conversion tool built around a large language
+      model. The goal of the project is to combine a React-based user interface with a
+      Python FastAPI backend and use an LLM agent to decide which conversion tool should
+      be executed. The system is designed so that the language model does not directly
+      perform arithmetic by itself. Instead, it interprets the natural-language request,
+      selects the correct tool, and passes the numerical input to that tool.
+    </p>
+    <p>
+      The project follows the required split architecture with a frontend for the user
+      interaction and a backend API that exposes the LLM orchestration. Ollama is used as
+      the local LLM provider. This makes the solution reproducible and aligned with the
+      assignment requirement that at least one LLM must be used through Ollama.
+    </p>
+
+    <h2>2. System Architecture</h2>
+    <p>The solution is divided into three main parts:</p>
+    <ul>
+      <li>
+        <strong>Frontend:</strong> A React application where the user can type a conversion
+        request, choose an Ollama model, and view the result.
+      </li>
+      <li>
+        <strong>Backend API:</strong> A FastAPI application that receives the request, calls
+        the agent, executes the selected conversion tool, and returns structured JSON.
+      </li>
+      <li>
+        <strong>Evaluation setup:</strong> Promptfoo configuration files prepared for model
+        and prompt evaluation across six different Ollama models.
+      </li>
+    </ul>
+    <p>
+      The backend is the central integration point. The frontend communicates only with
+      the FastAPI API, while the FastAPI service communicates with the Ollama server over
+      HTTP on <code>http://localhost:11434</code>.
+    </p>
+
+    <h2>3. User Interface</h2>
+    <p>
+      The user interface was implemented in React and designed to make the conversion flow
+      simple. The user can enter a natural-language prompt such as “Convert 5 kilograms to
+      pounds”, optionally choose an Ollama model, and submit the request. The UI then
+      displays the calculated result, the tool selected by the agent, and the conversion
+      formula used.
+    </p>
+    <img src="FrontEnd_Image.png" alt="Frontend screenshot" />
+    <p class="caption">Figure 1. Screenshot of the React frontend.</p>
+
+    <h2>4. API Design</h2>
+    <p>The backend API exposes two endpoints:</p>
+    <ul>
+      <li>
+        <strong>GET /health</strong>: Returns a simple health response together with the
+        configured Ollama base URL.
+      </li>
+      <li>
+        <strong>POST /convert</strong>: Accepts a JSON request with a natural-language input
+        and an optional model name. The response contains the selected model, the agent’s
+        reasoning, the selected tool, the tool arguments, the conversion result, and a
+        readable explanation.
+      </li>
+    </ul>
+    <p>A typical request body is:</p>
+    <pre>{
+  "user_input": "Convert 5 kilograms to pounds",
+  "model": "llama3.2:3b"
+}</pre>
+
+    <h2>5. Agent and Tools</h2>
+    <p>
+      The solution uses one agent called <code>ConversionAgent</code>. This agent receives
+      the user request, sends a system prompt and a user prompt to Ollama, and asks the
+      model to return a JSON object describing which tool to call and what numeric value
+      to pass to that tool.
+    </p>
+    <p>The current implementation includes six tools, satisfying the minimum requirement:</p>
+    <ul>
+      <li>Kilograms to pounds</li>
+      <li>Pounds to kilograms</li>
+      <li>Gallons to liters</li>
+      <li>Meters to feet</li>
+      <li>Fahrenheit to Celsius</li>
+      <li>Miles per hour to kilometers per hour</li>
+    </ul>
+    <p>
+      Each conversion is implemented as a dedicated backend function. This means the agent
+      acts as the decision-maker, while the actual arithmetic is handled by deterministic
+      tool functions. This approach reduces the risk of arithmetic hallucinations and makes
+      the architecture easier to test and document.
+    </p>
+
+    <h2>6. Model Choice</h2>
+    <p>
+      The default model configured in the current version is <code>llama3.2:3b</code>.
+      This model was selected as an initial baseline because it is lightweight, easy to
+      run locally through Ollama, and suitable for short classification-style tasks such as
+      selecting a tool from a constrained list. The Promptfoo setup also includes five more
+      candidate models: <code>llama3.1:8b</code>, <code>mistral:7b</code>,
+      <code>qwen2.5:7b</code>, <code>gemma2:9b</code>, and <code>phi3:3.8b</code>.
+    </p>
+    <p>
+      The final model choice should be based on evaluation results. The report should
+      discuss tradeoffs between speed, local resource usage, consistency of tool selection,
+      and numerical correctness.
+    </p>
+
+    <h2>7. Prompt Design</h2>
+    <p>
+      The prompting strategy is based on constrained structured output. The system prompt
+      tells the model that it is a unit conversion agent, that it must choose exactly one
+      available tool, and that it must return JSON only. The user prompt includes the list
+      of available tools and the original natural-language request.
+    </p>
+    <p>
+      This design is influenced by structured prompting and tool-usage prompting. By giving
+      the model a restricted set of tools and a strict JSON schema, the solution reduces
+      ambiguity and makes the backend easier to validate. The prompt also encourages the
+      model to extract a single numeric value from the request, which is important for
+      reliable tool invocation.
+    </p>
+
+    <h2>8. Evaluation Plan</h2>
+    <p>
+      Two Promptfoo configuration files were prepared to satisfy the second part of the
+      assignment. They split the evaluation into a basic conversion file and an extended
+      evaluation file. Together they cover six Ollama models and include rubric-based
+      scoring. Suggested evaluation cases include direct commands such as “Convert 5
+      kilograms to pounds” and alternative phrasings such as “How many liters are 3
+      gallons?”.
+    </p>
+    <p>
+      The main evaluation criteria are whether the model chooses the correct tool, whether
+      it extracts the correct numeric input, and whether the final converted value is
+      numerically reasonable. After the evaluations are run, screenshots from Promptfoo
+      should be attached and the final report should explain which model performed best and
+      why.
+    </p>
+
+    <h2>9. Current Status and Conclusion</h2>
+    <p>
+      The current version fulfills the main implementation requirements from part 1 of the
+      assignment: a React interface exists, a FastAPI backend exists, Ollama is integrated
+      as the LLM provider, one agent is used for orchestration, and at least six conversion
+      tools are available. In addition, the project already contains Promptfoo
+      configuration files for part 2 and a documentation structure that can be expanded
+      with actual evaluation results.
+    </p>
+    <p>
+      The next recommended step is to run the Promptfoo evaluations against the six chosen
+      models, collect screenshots, and update the final report with the concrete findings.
+      That will make the report complete and provide a clear justification for the final
+      production model.
+    </p>
+  </body>
+</html>

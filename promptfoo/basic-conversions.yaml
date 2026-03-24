@@ -1,0 +1,30 @@
+description: Basic conversion coverage for the unit conversion agent
+prompts:
+  - |
+    You are testing a unit conversion agent. The agent should choose one supported tool and answer accurately.
+    User request: {{input}}
+providers:
+  - ollama:llama3.2:3b
+  - ollama:llama3.1:8b
+  - ollama:mistral:7b
+tests:
+  - vars:
+      input: Convert 5 kilograms to pounds
+    assert:
+      - type: contains
+        value: kilograms_to_pounds
+  - vars:
+      input: Convert 10 meters to feet
+    assert:
+      - type: contains
+        value: meters_to_feet
+  - vars:
+      input: Convert 98 Fahrenheit to Celsius
+    assert:
+      - type: contains
+        value: fahrenheit_to_celsius
+defaultTest:
+  options:
+    rubricPrompt: |
+      Score the answer from 0 to 1.
+      Give 1 only if the response chooses the correct supported conversion tool and is numerically sensible.

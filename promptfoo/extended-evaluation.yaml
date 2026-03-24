@@ -1,0 +1,33 @@
+description: Extended Promptfoo evaluation across additional Ollama models
+prompts:
+  - |
+    You are testing prompt robustness for a unit conversion agent with these supported tools:
+    kilograms_to_pounds, pounds_to_kilograms, gallons_to_liters, meters_to_feet,
+    fahrenheit_to_celsius, miles_per_hour_to_kilometers_per_hour.
+    Respond with the expected tool name and converted value.
+    User request: {{input}}
+providers:
+  - ollama:qwen2.5:7b
+  - ollama:gemma2:9b
+  - ollama:phi3:3.8b
+tests:
+  - vars:
+      input: How many liters are 3 gallons?
+    assert:
+      - type: contains
+        value: gallons_to_liters
+  - vars:
+      input: Convert 150 pounds to kilograms
+    assert:
+      - type: contains
+        value: pounds_to_kilograms
+  - vars:
+      input: Convert 60 mph to km/h
+    assert:
+      - type: contains
+        value: miles_per_hour_to_kilometers_per_hour
+defaultTest:
+  options:
+    rubricPrompt: |
+      Score the answer from 0 to 1.
+      Give 1 only if the tool choice is correct and the conversion is correct within reasonable rounding.
